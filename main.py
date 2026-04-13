@@ -3,7 +3,7 @@ import cv2
 import time
 from src.utils import get_image_paths, write_output_csv
 from src.preprocessor import preprocess_image
-from src.detector import find_finder_patterns, get_qr_bounding_boxes
+from src.detector import get_qr_bounding_boxes_from_mask
 
 def main():
     parser = argparse.ArgumentParser()
@@ -31,14 +31,11 @@ def main():
         
         img = cv2.imread(img_path)
         if img is not None:
-            # 1. Tiền xử lý
-            binary_img, gray_img = preprocess_image(img)
+            # 1. Tiền xử lý (Trả ra mask đã bôi nhòe)
+            mask, gray_img = preprocess_image(img)
             
-            # 2. Tìm các ô vuông
-            fps = find_finder_patterns(binary_img)
-            
-            # 3. Tính toán 4 góc tọa độ
-            qrs = get_qr_bounding_boxes(fps)
+            # 2. Lấy tọa độ trực tiếp từ mask
+            qrs = get_qr_bounding_boxes_from_mask(mask)
             result_dict["qrs"] = qrs
             
         all_results.append(result_dict)
