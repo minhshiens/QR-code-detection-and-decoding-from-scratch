@@ -10,7 +10,7 @@ def main():
     parser.add_argument('--data', required=True, help="Đường dẫn file CSV")
     args = parser.parse_args()
 
-    # Bắt đầu bấm giờ (Theo tiêu chí Tốc độ của Giảng viên)
+    # Bấm giờ bắt đầu
     start_time = time.time()
     
     image_list = get_image_paths(args.data)
@@ -45,8 +45,8 @@ def main():
 
     # Dừng bấm giờ
     process_time = time.time() - start_time
-    print(f"⏱️ Tổng thời gian chạy: {process_time:.2f} giây")
-    print(f"⚡ Tốc độ trung bình: {process_time/len(image_list):.4f} giây/ảnh")
+    print(f" Tổng thời gian chạy: {process_time:.2f} giây")
+    print(f" Tốc độ trung bình: {process_time/len(image_list):.4f} giây/ảnh")
 
     # 4. Ghi file output
     write_output_csv(all_results, "output.csv")
