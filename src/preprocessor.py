@@ -1,28 +1,26 @@
 import cv2
+import numpy as np
 
 def preprocess_image(img):
-    """
-    Tiền xử lý ảnh: Chuyển ảnh màu sang ảnh nhị phân đen trắng
-    để chuẩn bị cho việc tìm các hình vuông của QR Code.
-    """
-    # 1. Chuyển ảnh màu sang ảnh xám (Grayscale)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     
-    # 2. Làm mờ nhẹ (Gaussian Blur) để khử nhiễu (các hạt sạn nhỏ trong ảnh)
-    # Kích thước kernel 5x5
-    blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+    gradX = cv2.Scharr(gray, cv2.CV_32F, 1, 0)
+    gradY = cv2.Scharr(gray, cv2.CV_32F, 0, 1)
     
-    # 3. Kỹ thuật: Adaptive Threshold
-    # Đừng dùng Threshold cứng (Global), vì nếu ảnh bị đổ bóng một nửa, 
-    # Threshold cứng sẽ làm đen thui phần bị bóng râm.
-    # Adaptive Threshold sẽ tính toán độ sáng dựa trên các vùng nhỏ (21x21 pixel).
-    # THRESH_BINARY_INV: Đảo ngược màu -> Viền đen của QR sẽ biến thành màu TRẮNG 
-    # (thuận lợi cho thuật toán tìm biên).
-    binary = cv2.adaptiveThreshold(
-        blurred, 255, 
-        cv2.ADAPTIVE_THRESH_GAUSSIAN_C, 
-        cv2.THRESH_BINARY_INV, 
-        21, 5
-    )
+    gradient = cv2.magnitude(gradX, gradY)
+    gradient = cv2.normalize(gradient, None, 0, 255, cv2.NORM_MINMAX, dtype=cv2.CV_8U)
     
-    return binary, gray
+    # ÁP DỤNG LỌC MỜ NHẸ ĐỂ GIẢM NHIỄU TRƯỚC KHI THRESHOLD
+    blurred = cv2.blur(gradient, (5, 5))
+
+    _, thresh = cv2.threshold(blurred, 50, 255, cv2.THRESH_BINARY)
+    
+    # THU NHỎ CHỔI QUÉT XUỐNG để không làm hỏng QR nhỏ
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (6, 6))
+    closed = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
+    
+    # Xói mòn và giãn nở để loại bỏ nhiễu nhỏ và làm mịn vùng phát hiện
+    closed = cv2.erode(closed, None, iterations=2)
+    closed = cv2.dilate(closed, None, iterations=2)
+    
+    return closed, gray

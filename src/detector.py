@@ -13,43 +13,49 @@ def order_points(pts):
     return rect
 
 def get_qr_bounding_boxes_from_mask(mask):
-    """
-    Tìm QR code dựa trên mặt nạ trắng (Mask) đã được tiền xử lý.
-    """
     qrs = []
-    # Tìm các đường viền bao quanh các mảng trắng
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     
     for c in contours:
         area = cv2.contourArea(c)
         
-        # Bỏ qua các mảng trắng quá nhỏ (chắc chắn là nhiễu rác)
-        if area < 1000:
+        # 1. HẠ NGƯỠNG DIỆN TÍCH TỪ 1000 XUỐNG 350 ĐỂ BẮT QR NHỎ
+        if area < 350:
             continue
             
-        # Tìm hình chữ nhật nghiêng bọc vừa khít mảng trắng
-        rect = cv2.minAreaRect(c)
-        box = cv2.boxPoints(rect)
-        box = np.int32(box)
+        # 2. KIỂM TRA SOLIDITY (ĐỘ ĐẶC)
+        hull = cv2.convexHull(c)
+        hull_area = cv2.contourArea(hull)
+        if hull_area == 0: continue
+        solidity = float(area) / hull_area
         
-        # Kiểm tra tỷ lệ khung hình (Aspect Ratio)
-        # Mã QR phải là hình vuông, tỷ lệ Aspect Ratio dao động quanh 1.0
-        w, h = rect[1]
-        if w == 0 or h == 0:
+        # QR Code bôi nhòe phải là một khối rất đặc (Solidity > 0.8)
+        # Các bụi cây, hàng rào, đoạn văn bản sẽ lồi lõm và bị loại ở đây
+        if solidity < 0.9:
             continue
+
+        rect = cv2.minAreaRect(c)
+        w, h = rect[1]
+        
+        # Chiều dài/rộng tối thiểu của 1 QR code
+        if w < 15 or h < 15:
+            continue
+            
         aspect_ratio = max(w, h) / min(w, h)
         
-        # Chấp nhận hình vuông hoặc hình chữ nhật hơi méo (do chụp nghiêng)
-        if aspect_ratio <= 1.8:
-            
-            # Chuẩn hóa thứ tự 4 góc theo yêu cầu của Grader
+        # 3. SIẾT CHẶT TỶ LỆ VUÔNG (Giảm FP)
+        if aspect_ratio <= 2.2:
+            box = cv2.boxPoints(rect)
+            box = np.int32(box)
             ordered_box = order_points(box)
             
+            # Thêm padding nhẹ 3 pixel để viền lấy trọn vẹn điểm IoU
+            pad = 3 # Điều chỉnh padding nếu cần (tăng lên nếu QR code bị cắt, giảm nếu bị dính vào vật khác)
             qrs.append({
-                "x0": float(ordered_box[0][0]), "y0": float(ordered_box[0][1]),
-                "x1": float(ordered_box[1][0]), "y1": float(ordered_box[1][1]),
-                "x2": float(ordered_box[2][0]), "y2": float(ordered_box[2][1]),
-                "x3": float(ordered_box[3][0]), "y3": float(ordered_box[3][1]),
+                "x0": float(ordered_box[0][0]-pad), "y0": float(ordered_box[0][1]-pad),
+                "x1": float(ordered_box[1][0]+pad), "y1": float(ordered_box[1][1]-pad),
+                "x2": float(ordered_box[2][0]+pad), "y2": float(ordered_box[2][1]+pad),
+                "x3": float(ordered_box[3][0]-pad), "y3": float(ordered_box[3][1]+pad),
                 "content": ""
             })
             
