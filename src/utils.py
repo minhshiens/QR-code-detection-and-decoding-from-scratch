@@ -1,7 +1,7 @@
 import os
 import csv
 
-def read_image_paths(csv_path):
+def get_image_paths(csv_path):
     """ Đọc file CSV """
 
     base_dir = os.path.dirname(csv_path)
@@ -9,7 +9,7 @@ def read_image_paths(csv_path):
     if base_dir == "":
         base_dir = "."
 
-    if not os.pth.exists(csv_path):
+    if not os.path.exists(csv_path):
         print(f"không tìm thấy file {csv_path}.")
         return []
     
