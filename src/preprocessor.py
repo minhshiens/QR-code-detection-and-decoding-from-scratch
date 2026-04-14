@@ -27,3 +27,4 @@ def preprocess_image(img):
     mask_coarse = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel_coarse)
     
     return mask_fine, mask_coarse, gray
+

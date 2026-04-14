@@ -75,17 +75,23 @@ def get_qr_bounding_boxes_from_mask(mask, min_solidity=0.9, min_area=350, aspect
             
         aspect_ratio = max(w, h) / min(w, h)
         
+        # 1. Mã QR chụp thẳng (Vuông vắn, cho phép hơi mẻ góc)
+        is_normal_qr = (aspect_ratio <= aspect_ratio_threshold) and (solidity >= min_solidity)
         
-        if aspect_ratio <= aspect_ratio_threshold:
+        # 2. Mã QR chụp nghiêng cực độ (Hình chữ nhật dẹt/dài, BẮT BUỘC phải cực kỳ đặc)
+        is_skewed_qr = (aspect_ratio_threshold < aspect_ratio <= 4.9) and (solidity >= 0.95)
+        
+        # Nếu thỏa mãn 1 trong 2 trường hợp thì lấy!
+        if is_normal_qr or is_skewed_qr:
+            
             box = cv2.boxPoints(rect)
             box = np.int32(box)
             ordered_box = order_points(box)
             
-            # Dynamic Padding 
-            # Thay vì cộng cứng 5 pixel, ta cộng 5% chiều dài của cạnh
+            # Tính padding (5%)
             pad_w = int(w * 0.05)
             pad_h = int(h * 0.05)
-            pad = max(pad_w, pad_h) # Lấy padding đều 4 góc
+            pad = max(pad_w, pad_h)
             
             raw_qrs.append({
                 "x0": float(ordered_box[0][0]-pad), "y0": float(ordered_box[0][1]-pad),

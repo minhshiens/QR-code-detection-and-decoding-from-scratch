@@ -34,6 +34,7 @@ def main():
             # 1. Tiền xử lý (Trả ra mask đã bôi nhòe)
             mask_fine, mask_coarse, gray = preprocess_image(img)
             
+            
             # 2. Lấy tọa độ trực tiếp từ mask
             qrs = get_qr_bounding_boxes_from_mask(mask_fine, min_solidity=0.91, min_area=350, aspect_ratio_threshold=2.2)
 

@@ -120,4 +120,4 @@ def evaluate(pred_file="output.csv", gt_file="ground_truth.csv", iou_threshold=0
     print("="*40)
 
 if __name__ == "__main__":
-    evaluate(pred_file="output.csv", gt_file="output_valid.csv")
+    evaluate(pred_file="output.csv", gt_file="output_train.csv")
