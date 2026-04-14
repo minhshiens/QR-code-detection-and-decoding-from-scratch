@@ -11,7 +11,7 @@ def preprocess_image(img):
     gradient = cv2.normalize(gradient, None, 0, 255, cv2.NORM_MINMAX, dtype=cv2.CV_8U)
     
     # ÁP DỤNG LỌC MỜ NHẸ ĐỂ GIẢM NHIỄU TRƯỚC KHI THRESHOLD
-    blurred = cv2.blur(gradient, (5, 5))
+    blurred = cv2.blur(gradient, (4, 4))
 
     _, thresh = cv2.threshold(blurred, 50, 255, cv2.THRESH_BINARY)
     
