@@ -38,7 +38,7 @@ def get_qr_bounding_boxes_from_mask(mask):
         w, h = rect[1]
         
         # Chiều dài/rộng tối thiểu của 1 QR code
-        if w < 15 or h < 15:
+        if w < 10 or h < 10:
             continue
             
         aspect_ratio = max(w, h) / min(w, h)
@@ -50,7 +50,11 @@ def get_qr_bounding_boxes_from_mask(mask):
             ordered_box = order_points(box)
             
             # Thêm padding nhẹ 3 pixel để viền lấy trọn vẹn điểm IoU
-            pad = 3 # Điều chỉnh padding nếu cần (tăng lên nếu QR code bị cắt, giảm nếu bị dính vào vật khác)
+            pad_w =int(w*0.09)
+            pad_h =int(h*0.09)
+            pad = max(pad_w, pad_h)
+
+            # pad = 3 # Điều chỉnh padding nếu cần (tăng lên nếu QR code bị cắt, giảm nếu bị dính vào vật khác)
             qrs.append({
                 "x0": float(ordered_box[0][0]-pad), "y0": float(ordered_box[0][1]-pad),
                 "x1": float(ordered_box[1][0]+pad), "y1": float(ordered_box[1][1]-pad),
