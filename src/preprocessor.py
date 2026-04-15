@@ -16,7 +16,7 @@ def preprocess_image(img):
     _, thresh = cv2.threshold(blurred, 50, 255, cv2.THRESH_BINARY)
     
     # THU NHỎ CHỔI QUÉT XUỐNG để không làm hỏng QR nhỏ
-    kernel_fine = cv2.getStructuringElement(cv2.MORPH_RECT, (6, 6))
+    kernel_fine = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
     mask_fine = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel_fine)
     
     # Xói mòn và giãn nở để loại bỏ nhiễu nhỏ và làm mịn vùng phát hiện
