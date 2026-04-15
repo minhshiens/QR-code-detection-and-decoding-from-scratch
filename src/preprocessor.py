@@ -23,7 +23,7 @@ def preprocess_image(img):
     mask_fine = cv2.erode(mask_fine, None, iterations=2)
     mask_fine = cv2.dilate(mask_fine, None, iterations=2)
 
-    kernel_coarse = cv2.getStructuringElement(cv2.MORPH_RECT, (15, 15))
+    kernel_coarse = cv2.getStructuringElement(cv2.MORPH_RECT, (17, 17))
     mask_coarse = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel_coarse)
     
     return mask_fine, mask_coarse, gray

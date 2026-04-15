@@ -70,7 +70,7 @@ def get_qr_bounding_boxes_from_mask(mask, min_solidity=0.9, min_area=350, aspect
 
         rect = cv2.minAreaRect(c)
         w, h = rect[1]
-        if w < 15 or h < 15:
+        if w < 18 or h < 18:
             continue
             
         aspect_ratio = max(w, h) / min(w, h)
