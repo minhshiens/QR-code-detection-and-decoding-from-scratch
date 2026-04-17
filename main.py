@@ -39,7 +39,7 @@ def main():
             qrs = get_qr_bounding_boxes_from_mask(mask_fine, min_solidity=0.91, min_area=350, aspect_ratio_threshold=2.2)
 
             if len(qrs) == 0:
-                qrs = get_qr_bounding_boxes_from_mask(mask_coarse, min_solidity=0.81, min_area=1400, aspect_ratio_threshold=3.1)
+                qrs = get_qr_bounding_boxes_from_mask(mask_coarse, min_solidity=0.81, min_area=9250, aspect_ratio_threshold=2.9)
             result_dict["qrs"] = qrs
             
 
