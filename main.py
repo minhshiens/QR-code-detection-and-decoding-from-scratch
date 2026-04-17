@@ -3,7 +3,7 @@ import cv2
 import time
 from src.utils import get_image_paths, write_output_csv
 from src.preprocessor import preprocess_image
-from src.detector import get_qr_bounding_boxes_from_mask
+from src.detector import get_qr_bounding_boxes_from_mask, apply_nms
 
 def main():
     parser = argparse.ArgumentParser()
@@ -44,6 +44,7 @@ def main():
             
 
         all_results.append(result_dict)
+
 
     # Dừng bấm giờ
     process_time = time.time() - start_time

@@ -89,8 +89,8 @@ def get_qr_bounding_boxes_from_mask(mask, min_solidity=0.9, min_area=350, aspect
             ordered_box = order_points(box)
             
             # Tính padding (5%)
-            pad_w = int(w * 0.05)
-            pad_h = int(h * 0.05)
+            pad_w = int(w * 0.061)
+            pad_h = int(h * 0.061)
             pad = max(pad_w, pad_h)
             
             raw_qrs.append({
@@ -105,3 +105,6 @@ def get_qr_bounding_boxes_from_mask(mask, min_solidity=0.9, min_area=350, aspect
     final_qrs = apply_nms(raw_qrs, distance_threshold=18)
     
     return final_qrs
+
+
+
