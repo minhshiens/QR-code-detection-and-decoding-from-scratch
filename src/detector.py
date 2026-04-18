@@ -106,5 +106,60 @@ def get_qr_bounding_boxes_from_mask(mask, min_solidity=0.9, min_area=350, aspect
     
     return final_qrs
 
-
+def verify_qr(img, qr_box):
+    """
+    Kỹ thuật X-Quang: Cắt ảnh, nắn phẳng và kiểm tra "nội tạng" bên trong
+    để xem nó có thực sự là mã QR hay không.
+    """
+    try:
+        # 1. Trích xuất 4 góc
+        pts_source = np.array([
+            [qr_box['x0'], qr_box['y0']],
+            [qr_box['x1'], qr_box['y1']],
+            [qr_box['x2'], qr_box['y2']],
+            [qr_box['x3'], qr_box['y3']]
+        ], dtype="float32")
+        
+        # 2. Nắn thẳng thành ảnh 100x100
+        size = 100
+        pts_dest = np.array([
+            [0, 0], [size - 1, 0], 
+            [size - 1, size - 1], [0, size - 1]
+        ], dtype="float32")
+        
+        matrix = cv2.getPerspectiveTransform(pts_source, pts_dest)
+        warped = cv2.warpPerspective(img, matrix, (size, size))
+        
+        # 3. Đưa về đen trắng bằng Otsu
+        gray = cv2.cvtColor(warped, cv2.COLOR_BGR2GRAY)
+        _, binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+        
+        # --- BỘ LỌC 1: CÂN BẰNG ĐEN TRẮNG ---
+        # Đếm số pixel trắng (giá trị 255)
+        white_pixels = cv2.countNonZero(binary)
+        total_pixels = size * size
+        white_ratio = white_pixels / total_pixels
+        
+        # Nếu quá trắng (>85%) hoặc quá đen (<15%) -> Rác!
+        if white_ratio < 0.15 or white_ratio > 0.85:
+            return False
+            
+        # --- BỘ LỌC 2: TẦN SUẤT GIAO ĐỘNG (TRANSITIONS) ---
+        # Lấy một hàng ngang ở giữa và một cột dọc ở giữa ảnh
+        mid_row = binary[size // 2, :]
+        mid_col = binary[:, size // 2]
+        
+        # Đếm số lần chuyển từ Đen sang Trắng hoặc ngược lại
+        row_transitions = np.sum(np.abs(np.diff(mid_row)) > 0)
+        col_transitions = np.sum(np.abs(np.diff(mid_col)) > 0)
+        
+        # Mã QR tối thiểu phải có 5-7 lần nhấp nháy Đen/Trắng trên 1 trục.
+        # Nới lỏng thành 4 để cứu các mã QR bị mờ.
+        if row_transitions < 6 or col_transitions < 6:
+            return False
+            
+        return True
+    except Exception:
+        # Nếu có lỗi (VD: góc bị âm, không cắt được ảnh) -> pass và coi như không phải QR
+        return False
 

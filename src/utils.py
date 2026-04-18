@@ -31,37 +31,36 @@ def get_image_paths(csv_path):
 
     return data_list
 
-def write_output_csv(results, output_filename = "output.csv"):
-    """ Ghi kết quả ra file CSV """
+def write_output_csv(results, output_filename="output.csv"):
     headers = [
         "image_id", "qr_index",
         "x0", "y0", "x1", "y1", 
         "x2", "y2", "x3", "y3",
         "content"
     ]
-
-    with open(output_filename, mode = "w", newline = "", encoding = "utf-8") as file:
-        writer = csv.writer(file)
+    # SỬ DỤNG QUOTING VÀ ESCAPECHAR ĐỂ ĐẢM BẢO TÍNH TOÀN VẸN CỦA DỮ LIỆU (TRÁNH LỖI KHI NỘI DUNG CÓ DẤU PHẨY HOẶC DẤU NGẠCH)
+    with open(output_filename, mode="w", newline="", encoding="utf-8") as file:
+        writer = csv.writer(file, quoting=csv.QUOTE_ALL, escapechar='\\')
         writer.writerow(headers)
 
         for res in results:
             img_id = res["image_id"]
             qrs = res["qrs"]
 
-
             # Với trường hợp không có QR code  
             if len(qrs) == 0:
                 writer.writerow([img_id, "", "", "", "", "", "", "", "", "", ""])
             else:
                 for idx, qr in enumerate(qrs):
+                    # ÉP KIỂU SANG SỐ NGUYÊN (INT) ĐỂ FILE GỌN VÀ CHUẨN PIXEL
                     writer.writerow([
                         img_id,
                         idx,
-                        qr["x0"], qr["y0"], qr["x1"], qr["y1"],
-                        qr["x2"], qr["y2"], qr["x3"], qr["y3"],
+                        int(round(qr["x0"])), int(round(qr["y0"])), 
+                        int(round(qr["x1"])), int(round(qr["y1"])),
+                        int(round(qr["x2"])), int(round(qr["y2"])), 
+                        int(round(qr["x3"])), int(round(qr["y3"])),
                         qr.get("content", "")
                     ])
 
-        print(f"Kết quả đã được ghi vào {output_filename}.")
-
-
+    print(f"✅ Kết quả đã được ghi vào {output_filename}.")

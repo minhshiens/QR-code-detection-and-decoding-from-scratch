@@ -3,7 +3,7 @@ import cv2
 import time
 from src.utils import get_image_paths, write_output_csv
 from src.preprocessor import preprocess_image
-from src.detector import get_qr_bounding_boxes_from_mask, apply_nms
+from src.detector import get_qr_bounding_boxes_from_mask, verify_qr
 
 def main():
     parser = argparse.ArgumentParser()
@@ -36,11 +36,23 @@ def main():
             
             
             # 2. Lấy tọa độ trực tiếp từ mask
-            qrs = get_qr_bounding_boxes_from_mask(mask_fine, min_solidity=0.91, min_area=350, aspect_ratio_threshold=2.2)
+            qrs_fine = get_qr_bounding_boxes_from_mask(mask_fine, min_solidity=0.91, min_area=350, aspect_ratio_threshold=2.2)
 
-            if len(qrs) == 0:
-                qrs = get_qr_bounding_boxes_from_mask(mask_coarse, min_solidity=0.81, min_area=9250, aspect_ratio_threshold=2.9)
-            result_dict["qrs"] = qrs
+            if len(qrs_fine) == 0:
+                qrs_coarse = get_qr_bounding_boxes_from_mask(mask_coarse, min_solidity=0.81, min_area=9250, aspect_ratio_threshold=2.9)
+                qrs = qrs_coarse
+            else:
+                qrs = qrs_fine
+
+            verified_qrs = []
+            for qr in qrs:
+                if verify_qr(img, qr):
+                    verified_qrs.append(qr)
+                    
+            result_dict["qrs"] = verified_qrs
+
+
+            # result_dict["qrs"] = qrs
             
 
         all_results.append(result_dict)
