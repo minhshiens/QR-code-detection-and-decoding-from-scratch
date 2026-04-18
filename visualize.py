@@ -26,7 +26,7 @@ def get_boxes_from_csv(csv_path, target_img_id):
 imgpath = "lotsimage001_jpg.rf.750a41e5352a6b9b590aad4063b839c0"
 
 def main():
-    # ĐIỀN TÊN 1 BỨC ẢNH MÀ BẠN THẤY TỌA ĐỘ KHÔNG GIỐNG NHAU VÀO ĐÂY
+    
     TARGET_IMG_ID = imgpath 
     
     # CHỈ ĐƯỜNG DẪN TỚI FILE ẢNH ĐÓ TRÊN MÁY BẠN
