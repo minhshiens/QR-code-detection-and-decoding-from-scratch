@@ -59,10 +59,10 @@ def main():
                         
                     else:
                         # TẦNG 4: Mã QR bị rách, bị ngón tay che, bị dán tem đè
-                        qrs_torn = get_qr_bounding_boxes_from_mask(mask_coarse, min_solidity=0.76, min_area=500, aspect_ratio_threshold=2.2)
+                        qrs_torn = get_qr_bounding_boxes_from_mask(mask_coarse, min_solidity=0.76, min_area=500, aspect_ratio_threshold=2.0)
                         qrs = qrs_torn
-
-
+            
+            # 2. Khử trùng lặp (Nhiều box chồng lên nhau do cùng nằm trên 1 mã QR) -> Giữ lại box to nhất
             verified_qrs = []
             for qr in qrs:
                 if verify_qr(img, qr):

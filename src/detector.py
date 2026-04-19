@@ -140,7 +140,7 @@ def verify_qr(img, qr_box):
         total_pixels = size * size
         white_ratio = white_pixels / total_pixels
         
-        # Nếu quá trắng (>85%) hoặc quá đen (<15%) -> Rác!
+        # Nếu quá trắng (>85%) hoặc quá đen (<15%) -> Khả năng cao không phải QR (Mã QR thường có sự cân bằng giữa 2 màu)
         if white_ratio < 0.15 or white_ratio > 0.85:
             return False
             
@@ -162,4 +162,5 @@ def verify_qr(img, qr_box):
     except Exception:
         # Nếu có lỗi (VD: góc bị âm, không cắt được ảnh) -> pass và coi như không phải QR
         return False
+    
 

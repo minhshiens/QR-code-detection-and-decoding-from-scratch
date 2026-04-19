@@ -38,9 +38,9 @@ def write_output_csv(results, output_filename="output.csv"):
         "x2", "y2", "x3", "y3",
         "content"
     ]
-    # SỬ DỤNG QUOTING VÀ ESCAPECHAR ĐỂ ĐẢM BẢO TÍNH TOÀN VẸN CỦA DỮ LIỆU (TRÁNH LỖI KHI NỘI DUNG CÓ DẤU PHẨY HOẶC DẤU NGẠCH)
+    # Ghi CSV chuẩn: chỉ quote khi cần thiết để giữ định dạng RFC 4180.
     with open(output_filename, mode="w", newline="", encoding="utf-8") as file:
-        writer = csv.writer(file, quoting=csv.QUOTE_ALL, escapechar='\\')
+        writer = csv.writer(file, quoting=csv.QUOTE_MINIMAL)
         writer.writerow(headers)
 
         for res in results:
