@@ -34,15 +34,34 @@ def main():
             # 1. Tiền xử lý (Trả ra mask đã bôi nhòe)
             mask_fine, mask_coarse, gray = preprocess_image(img)
             
-            
-            # 2. Lấy tọa độ trực tiếp từ mask
-            qrs_fine = get_qr_bounding_boxes_from_mask(mask_fine, min_solidity=0.91, min_area=350, aspect_ratio_threshold=2.2)
 
-            if len(qrs_fine) == 0:
-                qrs_coarse = get_qr_bounding_boxes_from_mask(mask_coarse, min_solidity=0.81, min_area=9250, aspect_ratio_threshold=2.9)
-                qrs = qrs_coarse
-            else:
+            # Bộ lọc 4 tầng để phát hiện đa dạng các loại mã QR khác nhau, từ rõ nét đến cực kỳ khó nhận diện:
+            
+            # TẦNG 1: Mã QR Tiêu chuẩn (Nét, vuông vắn, rõ ràng)
+            qrs_fine = get_qr_bounding_boxes_from_mask(mask_fine, min_solidity=0.91, min_area=350, aspect_ratio_threshold=2.2)
+            
+            if len(qrs_fine) > 0:
                 qrs = qrs_fine
+                
+            else:
+                # TẦNG 2: Mã QR Khổng lồ / Đứt gãy li ti
+                qrs_coarse = get_qr_bounding_boxes_from_mask(mask_coarse, min_solidity=0.81, min_area=9250, aspect_ratio_threshold=2.9)
+                
+                if len(qrs_coarse) > 0:
+                    qrs = qrs_coarse
+                    
+                else:
+                    # TẦNG 3: Mã QR Siêu nhỏ / Nghiêng xéo cực độ
+                    qrs_extreme = get_qr_bounding_boxes_from_mask(mask_fine, min_solidity=0.82, min_area=120, aspect_ratio_threshold=4.5)
+                    
+                    if len(qrs_extreme) > 0:
+                        qrs = qrs_extreme
+                        
+                    else:
+                        # TẦNG 4: Mã QR bị rách, bị ngón tay che, bị dán tem đè
+                        qrs_torn = get_qr_bounding_boxes_from_mask(mask_coarse, min_solidity=0.76, min_area=500, aspect_ratio_threshold=2.2)
+                        qrs = qrs_torn
+
 
             verified_qrs = []
             for qr in qrs:
@@ -51,8 +70,6 @@ def main():
                     
             result_dict["qrs"] = verified_qrs
 
-
-            # result_dict["qrs"] = qrs
             
 
         all_results.append(result_dict)
